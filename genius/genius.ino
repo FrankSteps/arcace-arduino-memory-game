@@ -7,7 +7,7 @@
   Outros participantes deste projeto:
     * V. S. Junior (Scarnera)
 
-  (Pela última vez...)
+  Pela última vez:
   Modificado por: Francisco Passos
   Modificado em: 07/09/2025
 
@@ -21,14 +21,14 @@
     Website onlinegbd compiler: https://learn.onlinegdb.com/c%2B%2B_array
 
   Para a mais fácil visualização técnica deste projeto é necessário ter como base os conhecimentos em:
+      * lógica de programação
       * tipos de vaeriáveis e suas aplicações
       * funções e chamadas de funções em C++  
       * vetores/arrays em C++ 
       * conhecimento básico em circuitos eletrônicos
-      * lógica de programação
 
   - Detalhes importantes sobre o projeto - 
-      * Os botões estão configurados como pull down
+      * Os botões estão configurados como pull_down
 */
 
 //indicando os pinos digitais de cada componente
