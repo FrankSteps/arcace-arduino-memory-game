@@ -5,7 +5,7 @@
 
   Sob a supervisão de: Edvaldo Alves
   Outros participantes deste projeto:
-    * V. S. Junior (Scarnera)
+    * V. S. Junior (Scarnera) -> Vai fazer a parte mais chata 🙏🙏🙏🙏🙏🙏🙏🙏🙏
 
   Pela última vez:
   Modificado por: Francisco Passos
@@ -19,6 +19,7 @@
   Materiais de apoio durante a programação deste código fonte:
     Playlist do professor josé de assis: https://www.youtube.com/watch?v=gYgGgox5Q4o&list=PLbEOwbQR9lqwq5E0DW3CvjfmF4FoIAW1f  
     Website onlinegbd compiler: https://learn.onlinegdb.com/c%2B%2B_array
+    wensite onlinegbd compiler: https://learn.onlinegdb.com/c%2B%2B_vector
 
   Para a mais fácil visualização técnica deste projeto é necessário ter como base os conhecimentos em:
       * lógica de programação
