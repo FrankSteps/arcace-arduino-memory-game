@@ -19,7 +19,6 @@
   Materiais de apoio durante a programação deste código fonte:
     Playlist do professor josé de assis: https://www.youtube.com/watch?v=gYgGgox5Q4o&list=PLbEOwbQR9lqwq5E0DW3CvjfmF4FoIAW1f  
     Website onlinegbd compiler: https://learn.onlinegdb.com/c%2B%2B_array
-    wensite onlinegbd compiler: https://learn.onlinegdb.com/c%2B%2B_vector
 
   Para a mais fácil visualização técnica deste projeto é necessário ter como base os conhecimentos em:
       * lógica de programação
@@ -30,31 +29,41 @@
 
   - Detalhes importantes sobre o projeto - 
       * Os botões estão configurados como pull_down
-*/
 
-//indicando os pinos digitais de cada componente
+      * Frequência das notas:
+        Dó - 262 Hz
+        Ré - 294 Hz
+        Mi - 330 Hz
+        Fá - 349 Hz
+        Sol - 392 Hz
+        Lá - 440 Hz
+        Si - 494 Hz
+        #Dó - 528 Hz
+*/
 
 //leds
 const int red = 2;
 const int green = 3;
 const int blue = 4;
 const int yellow = 5;
-const int level = 6;
+
+//buzzer passivo
+const int buzzer = 6;
 
 //botões
-const int botao_r = 8;
-const int botao_g = 9;
-const int botao_b = 10;
-const int botao_y = 11;
+const int button_r = 8;
+const int button_g = 9;
+const int button_b = 10;
+const int button_y = 11;
+
 
 // **************** Variáveis globais do software **************** //
 
 //array -> coração do projeto (é uma lista de variáveis de um único tipo) Neste projeto é conveniente o uso de inteiros (int)
 int sequence[32] = {};
-int leds[4] = { 2, 3, 4, 5, 6 };
+int leds[4] = { 2, 3, 4, 5 };
 int buttons[4] = { 8, 9, 10, 11 };
-
-//int tone[4] = {262, 294, 330, 349}; -> irei implementar assim que os primeiros testes forem feitos
+int tones[4] = { 262, 294, 330, 349 };  //->irei implementar assim que os primeiros testes forem feitos
 
 //indicando que o jogo começa no round 0
 int round = 0;
@@ -66,6 +75,7 @@ int button_pressed = 0;
 //indica se o jogo terminou ou não
 bool gameOver = false;
 
+
 // ****************    Manipulação do software  **************** //
 // ****************  Configurações e as chamadas   **************** //
 
@@ -76,11 +86,11 @@ void setup() {
   pinMode(green, OUTPUT);
   pinMode(blue, OUTPUT);
   pinMode(yellow, OUTPUT);
-  pinMode(level, OUTPUT);
-  pinMode(botao_r, INPUT);
-  pinMode(botao_g, INPUT);
-  pinMode(botao_b, INPUT);
-  pinMode(botao_y, INPUT);
+  pinMode(button_r, INPUT);
+  pinMode(button_g, INPUT);
+  pinMode(button_b, INPUT);
+  pinMode(button_y, INPUT);
+  pinMode(buzzer, OUTPUT);
   led_start_lose(3, 500);
 }
 
@@ -93,7 +103,7 @@ void loop() {
 
   //reiniciando as variáveis caso seja fim de jogo
   if (gameOver == true) {
-    sequence[32] = {};
+    memset(sequence, 0, sizeof(sequence));
     round = 0;
     step = 0;
     gameOver = false;
@@ -102,9 +112,9 @@ void loop() {
   delay(1000);
 }
 
+
 // ****************     Funções do projeto    **************** //
 // ****************   chamadas anteriormente   **************** //
-
 
 //(quantas vezes vai piscar, por quanto tempo os leds irão ficar naquele estado (aceso ou apagado)
 void led_start_lose(int Tblink, int time) {
@@ -113,35 +123,35 @@ void led_start_lose(int Tblink, int time) {
     digitalWrite(green, HIGH);
     digitalWrite(blue, HIGH);
     digitalWrite(yellow, HIGH);
-    digitalWrite(level, HIGH);
     delay(time);
     digitalWrite(red, LOW);
     digitalWrite(green, LOW);
     digitalWrite(blue, LOW);
     digitalWrite(yellow, LOW);
-    digitalWrite(level, LOW);
     delay(time);
   }
 }
 
 //função responsável por aplicar a próxima rodada ao jogo
-nextRound() {
+void nextRound() {
   //sorteia um número e o adiciona ao array (vetor/lista) sequence[32]{};
   int rand = random(4);
   sequence[round] = rand;
-  round++; //round + 1 = round++
+  round++;  //round + 1 = round++
 
   //verificar como software está lidando com as variáveis
-  serial.println(rand);
+  Serial.println(rand);
 }
 
 //função responsável por aplicar a sequência criada software
-reprSequence() {
+void reprSequence() {
   //liga o led análogo à array de sequencia
   for (int i = 0; i < round; i++) {
     digitalWrite(leds[sequence[i]], HIGH);
+    tone(buzzer, tones[sequence[i]]);
     delay(500);
     digitalWrite(leds[sequence[i]], LOW);
+    noTone(buzzer);
     delay(100);
   }
 }
@@ -151,15 +161,17 @@ reprSequence() {
 void waitPlayer() {
   // Loop que aguarda e confere cada jogada do jogador em relação à sequência
   for (int i = 0; i < round; i++) {
-    bool move_made = false; //mantêm o software parado até o jogador pressionar o botão
+    bool move_made = false;  //mantêm o software parado até o jogador pressionar o botão
     while (!move_made) {
       for (int i = 0; i <= 3; i++) {
         if (digitalRead(buttons[i]) == HIGH) {
           button_pressed = i;
           digitalWrite(leds[i], HIGH);
+          tone(buzzer, tones[i]);
           delay(300);
           digitalWrite(leds[i], LOW);
-          move_made = true; //marca que o jogador pressionou o botão
+          noTone(buzzer);
+          move_made = true;  //marca que o jogador pressionou o botão
           delay(1000);
         }
       }
@@ -168,12 +180,11 @@ void waitPlayer() {
     if (sequence[step] != button_pressed) {
       //finalizando o jogo...
       led_start_lose(3, 1000);
-      gameOver = true; //perdeu, mané 🤣
-      break; //quebra o funcionamento desta função e volta para o void loop 
+      gameOver = true;  //perdeu, mané 🤣
+      break;            //quebra o funcionamento desta função e volta para o void loop
     }
-    step++; //step + 1 = step++
+    step++;  //step + 1 = step++
   }
   //reiniciamos o passo do jogador para o 0 para indicar uma nova fase - voltando para o loop.
   step = 0;
 }
-
