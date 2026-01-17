@@ -5,20 +5,40 @@
  Desenvolvedor:    Francisco Passos
  Desenvolvido por: 28/11/2025
 
- modificado em: 16/01/2026
+ modificado em: 17/01/2026
+ 
+ Estado deste código de teste: Pronto para ser aplicado ao código principal
 */
 
 const int xJoyPin = A0;
 const int yJoyPin = A1;
 const int zonaPer = 100;
 
-String saveDirUser(int mapX, int mapY){
-  if(mapX ==  0 && mapY ==  1) return "UP";
-  if(mapX ==  0 && mapY == -1) return "DOWN";
-  if(mapX ==  1 && mapY ==  0) return "LEFT";
-  if(mapX == -1 && mapY ==  0) return "RIGHT";
+int xJoyValue;
+int yJoyValue;
 
-  return "...";
+String dirJoyStick[4] = {"LEFT", "RIGHT", "UP", "DOWN"};
+  
+
+bool validMoveDetected(){
+  if(xJoyValue < 512 - zonaPer || xJoyValue > 512 + zonaPer ||
+     yJoyValue < 512 - zonaPer || yJoyValue > 512 + zonaPer  ){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+int dirJoyID(){
+  if(!validMoveDetected()) return -1;
+
+  if(xJoyValue < 512 - zonaPer) return 0;
+  if(xJoyValue > 512 + zonaPer) return 1;
+  if(yJoyValue < 512 - zonaPer) return 2;
+  if(yJoyValue > 512 + zonaPer) return 3;
+
+  // unidentified
+  return -1; 
 }
 
 void setup(){
@@ -26,28 +46,14 @@ void setup(){
 }
 
 void loop(){
-  int xJoyValue = analogRead(xJoyPin);
-  int yJoyValue = analogRead(yJoyPin);
+  xJoyValue = analogRead(xJoyPin);
+  yJoyValue = analogRead(yJoyPin);
 
-  int xMapValue = 0;
-  int yMapValue = 0;
+  int dir = dirJoyID();
 
-  if (xJoyValue < 512 - zonaPer){
-    xMapValue = -1; 
-  } else if (xJoyValue > 512 + zonaPer) {
-    xMapValue =  1; 
+  if (dir != -1){
+    Serial.println(dirJoyStick[dir]);
   }
-
-  if (yJoyValue < 512 - zonaPer){
-    yMapValue = -1; 
-  } else if (yJoyValue > 512 + zonaPer) {
-    yMapValue =  1; 
-  }
-
-  Serial.print("X: "); Serial.println(xMapValue);
-  Serial.print("Y: "); Serial.println(yMapValue);
-
-  Serial.println(saveDirUser(xMapValue, yMapValue));
-
+    
   delay(100);
 }

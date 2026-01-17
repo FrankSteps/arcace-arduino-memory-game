@@ -9,7 +9,7 @@
 
   Pela última vez:
   Modificado por: Francisco Passos
-  Modificado em: 09/09/2025
+  Modificado em: 17/01/2026
 
   E-mails para contato do desenvolvedor deste projeto:
   E-mail pessoal:       franciscopassos.contato@gmail.com   
@@ -39,18 +39,21 @@
         Lá - 440 Hz
         Si - 494 Hz
         #Dó - 528 Hz
+
+   Detalhes: Estou fazendo testes com o joystick e entendendo o seu funcionamento. Assim que conveniente, irei implementá-lo a este 
+   código. 
 */
 
-//leds
+// leds
 const int red = 2;
 const int green = 3;
 const int blue = 4;
 const int yellow = 5;
 
-//buzzer passivo
+// buzzer passivo
 const int buzzer = 6;
 
-//botões
+// botões
 const int button_r = 8;
 const int button_g = 9;
 const int button_b = 10;
@@ -59,27 +62,27 @@ const int button_y = 11;
 
 // **************** Variáveis globais do software **************** //
 
-//array -> coração do projeto (é uma lista de variáveis de um único tipo) Neste projeto é conveniente o uso de inteiros (int)
+// array -> coração do projeto (é uma lista de variáveis de um único tipo) Neste projeto é conveniente o uso de inteiros (int)
 int sequence[32] = {};
 int leds[4] = { 2, 3, 4, 5 };
 int buttons[4] = { 8, 9, 10, 11 };
-int tones[4] = { 262, 294, 330, 349 };  //->irei implementar assim que os primeiros testes forem feitos
+int tones[4] = { 262, 294, 330, 349 };
 
-//indicando que o jogo começa no round 0
+// indicando que o jogo começa no round 0
 int round = 0;
 
-//variáveis responsáveis pela resposta do usuário/jogador
+// variáveis responsáveis pela resposta do usuário/jogador
 int step = 0;
 int button_pressed = 0;
 
-//indica se o jogo terminou ou não
+// indica se o jogo terminou ou não
 bool gameOver = false;
 
 
 // ****************    Manipulação do software  **************** //
 // ****************  Configurações e as chamadas   **************** //
 
-//configurações iniciais -> definindo saída, entrada, chamando funções para indicar sinalização, serial e etc
+// configurações iniciais -> definindo saída, entrada, chamando funções para indicar sinalização, serial e etc
 void setup() {
   Serial.begin(9600);
   pinMode(red, OUTPUT);
@@ -94,14 +97,14 @@ void setup() {
   led_start_lose(3, 500);
 }
 
-//função de loop (não me fale mais nada!)
+// função de loop (não me fale mais nada!)
 void loop() {
-  //separando as ações em funções - cada uma será responsável por uma etapa do jogo
+  // separando as ações em funções - cada uma será responsável por uma etapa do jogo
   nextRound();
   reprSequence();
   waitPlayer();
 
-  //reiniciando as variáveis caso seja fim de jogo
+  // reiniciando as variáveis caso seja fim de jogo
   if (gameOver == true) {
     memset(sequence, 0, sizeof(sequence));
     round = 0;
@@ -116,7 +119,7 @@ void loop() {
 // ****************     Funções do projeto    **************** //
 // ****************   chamadas anteriormente   **************** //
 
-//(quantas vezes vai piscar, por quanto tempo os leds irão ficar naquele estado (aceso ou apagado)
+// (quantas vezes vai piscar, por quanto tempo os leds irão ficar naquele estado (aceso ou apagado)
 void led_start_lose(int Tblink, int time) {
   for (int i = 0; i < Tblink; i++) {
     digitalWrite(red, HIGH);
@@ -132,18 +135,18 @@ void led_start_lose(int Tblink, int time) {
   }
 }
 
-//função responsável por aplicar a próxima rodada ao jogo
+// função responsável por aplicar a próxima rodada ao jogo
 void nextRound() {
-  //sorteia um número e o adiciona ao array (vetor/lista) sequence[32]{};
+  // sorteia um número e o adiciona ao array (vetor/lista) sequence[32]{};
   int rand = random(4);
   sequence[round] = rand;
   round++;  //round + 1 = round++
 
-  //verificar como software está lidando com as variáveis
+  // verificar como software está lidando com as variáveis
   Serial.println(rand);
 }
 
-//função responsável por aplicar a sequência criada software
+// função responsável por aplicar a sequência criada software
 void reprSequence() {
   //liga o led análogo à array de sequencia
   for (int i = 0; i < round; i++) {
@@ -156,12 +159,13 @@ void reprSequence() {
   }
 }
 
-//função responsável por verificar o desempenho do player
-//move_made = jogada efetuada/feita
+// função responsável por verificar o desempenho do player
+// move_made = jogada efetuada/feita
 void waitPlayer() {
   // Loop que aguarda e confere cada jogada do jogador em relação à sequência
   for (int i = 0; i < round; i++) {
-    bool move_made = false;  //mantêm o software parado até o jogador pressionar o botão
+    bool move_made = false;  // mantêm o software parado até o jogador pressionar o botão
+    
     while (!move_made) {
       for (int i = 0; i <= 3; i++) {
         if (digitalRead(buttons[i]) == HIGH) {
@@ -176,15 +180,16 @@ void waitPlayer() {
         }
       }
     }
-    //O software precisa verificar se o jogador acertou a jogada - por isso, ao olhar o pior dos casos:
+    // O software precisa verificar se o jogador acertou a jogada - por isso, ao olhar o pior dos casos:
     if (sequence[step] != button_pressed) {
-      //finalizando o jogo...
+      // finalizando o jogo...
       led_start_lose(3, 1000);
       gameOver = true;  //perdeu, mané 🤣
       break;            //quebra o funcionamento desta função e volta para o void loop
     }
     step++;  //step + 1 = step++
   }
-  //reiniciamos o passo do jogador para o 0 para indicar uma nova fase - voltando para o loop.
+  
+  // reiniciamos o passo do jogador para o 0 para indicar uma nova fase - voltando para o loop.
   step = 0;
 }
