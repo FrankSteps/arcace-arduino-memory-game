@@ -69,7 +69,7 @@ int buttons[4] = { 8, 9, 10, 11 };
 int tones[4] = { 262, 294, 330, 349 };
 
 // indicando que o jogo começa no round 0
-int round = 0;
+int Round = 0;
 
 // variáveis responsáveis pela resposta do usuário/jogador
 int step = 0;
@@ -85,15 +85,21 @@ bool gameOver = false;
 // configurações iniciais -> definindo saída, entrada, chamando funções para indicar sinalização, serial e etc
 void setup() {
   Serial.begin(9600);
+
   pinMode(red, OUTPUT);
   pinMode(green, OUTPUT);
   pinMode(blue, OUTPUT);
   pinMode(yellow, OUTPUT);
+
   pinMode(button_r, INPUT);
   pinMode(button_g, INPUT);
   pinMode(button_b, INPUT);
   pinMode(button_y, INPUT);
+
   pinMode(buzzer, OUTPUT);
+
+  randomSeed(analogRead(A0));
+
   led_start_lose(3, 500);
 }
 
@@ -107,7 +113,7 @@ void loop() {
   // reiniciando as variáveis caso seja fim de jogo
   if (gameOver == true) {
     memset(sequence, 0, sizeof(sequence));
-    round = 0;
+    Round = 0;
     step = 0;
     gameOver = false;
   }
@@ -120,36 +126,41 @@ void loop() {
 // ****************   chamadas anteriormente   **************** //
 
 // (quantas vezes vai piscar, por quanto tempo os leds irão ficar naquele estado (aceso ou apagado)
-void led_start_lose(int Tblink, int time) {
-  for (int i = 0; i < Tblink; i++) {
+void led_start_lose(int tBlink, int ledTime) {
+  for (int i = 0; i < tBlink; i++) {
     digitalWrite(red, HIGH);
     digitalWrite(green, HIGH);
     digitalWrite(blue, HIGH);
     digitalWrite(yellow, HIGH);
-    delay(time);
+    delay(ledTime);
     digitalWrite(red, LOW);
     digitalWrite(green, LOW);
     digitalWrite(blue, LOW);
     digitalWrite(yellow, LOW);
-    delay(time);
+    delay(ledTime);
   }
 }
 
 // função responsável por aplicar a próxima rodada ao jogo
 void nextRound() {
+  if (Round >= 32) {
+    gameOver = true;
+    return;
+  }
+
   // sorteia um número e o adiciona ao array (vetor/lista) sequence[32]{};
-  int rand = random(4);
-  sequence[round] = rand;
-  round++;  //round + 1 = round++
+  int randValue = random(4);
+  sequence[Round] = randValue;
+  Round++;  //round + 1 = round++
 
   // verificar como software está lidando com as variáveis
-  Serial.println(rand);
+  Serial.println(randValue);
 }
 
 // função responsável por aplicar a sequência criada software
 void reprSequence() {
   //liga o led análogo à array de sequencia
-  for (int i = 0; i < round; i++) {
+  for (int i = 0; i < Round; i++) {
     digitalWrite(leds[sequence[i]], HIGH);
     tone(buzzer, tones[sequence[i]]);
     delay(500);
@@ -163,23 +174,24 @@ void reprSequence() {
 // move_made = jogada efetuada/feita
 void waitPlayer() {
   // Loop que aguarda e confere cada jogada do jogador em relação à sequência
-  for (int i = 0; i < round; i++) {
+  for (int i = 0; i < Round; i++) {
     bool move_made = false;  // mantêm o software parado até o jogador pressionar o botão
     
     while (!move_made) {
-      for (int i = 0; i <= 3; i++) {
-        if (digitalRead(buttons[i]) == HIGH) {
-          button_pressed = i;
-          digitalWrite(leds[i], HIGH);
-          tone(buzzer, tones[i]);
+      for (int btn = 0; btn < 4; btn++) {
+        if (digitalRead(buttons[btn]) == HIGH) {
+          button_pressed = btn;
+          digitalWrite(leds[btn], HIGH);
+          tone(buzzer, tones[btn]);
           delay(300);
-          digitalWrite(leds[i], LOW);
+          digitalWrite(leds[btn], LOW);
           noTone(buzzer);
           move_made = true;  //marca que o jogador pressionou o botão
           delay(1000);
         }
       }
     }
+
     // O software precisa verificar se o jogador acertou a jogada - por isso, ao olhar o pior dos casos:
     if (sequence[step] != button_pressed) {
       // finalizando o jogo...
@@ -187,7 +199,8 @@ void waitPlayer() {
       gameOver = true;  //perdeu, mané 🤣
       break;            //quebra o funcionamento desta função e volta para o void loop
     }
-    step++;  //step + 1 = step++
+
+    step++;
   }
   
   // reiniciamos o passo do jogador para o 0 para indicar uma nova fase - voltando para o loop.
