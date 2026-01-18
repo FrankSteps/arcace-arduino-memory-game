@@ -53,11 +53,9 @@ const int yellow = 5;
 // buzzer passivo
 const int buzzer = 6;
 
-// botões
-const int button_r = 8;
-const int button_g = 9;
-const int button_b = 10;
-const int button_y = 11;
+// joystick
+const int xJoyPin = A0;
+const int yJoyPin = A1;
 
 
 // **************** Variáveis globais do software **************** //
@@ -65,19 +63,26 @@ const int button_y = 11;
 // array -> coração do projeto (é uma lista de variáveis de um único tipo) Neste projeto é conveniente o uso de inteiros (int)
 int sequence[32] = {};
 int leds[4] = { 2, 3, 4, 5 };
-int buttons[4] = { 8, 9, 10, 11 };
 int tones[4] = { 262, 294, 330, 349 };
 
 // indicando que o jogo começa no round 0
 int Round = 0;
 
 // variáveis responsáveis pela resposta do usuário/jogador
-int step = 0;
 int button_pressed = 0;
+int step = 0;
 
 // indica se o jogo terminou ou não
 bool gameOver = false;
 
+// variáveis para o funcionamento do joystick
+const int zonaPer = 100;
+
+int xJoyValue;
+int yJoyValue;
+
+// mantido aqui apenas para debug no terminal serial
+String dirJoyStick[4] = {"LEFT", "RIGHT", "UP", "DOWN"};
 
 // ****************    Manipulação do software  **************** //
 // ****************  Configurações e as chamadas   **************** //
@@ -91,14 +96,9 @@ void setup() {
   pinMode(blue, OUTPUT);
   pinMode(yellow, OUTPUT);
 
-  pinMode(button_r, INPUT);
-  pinMode(button_g, INPUT);
-  pinMode(button_b, INPUT);
-  pinMode(button_y, INPUT);
-
   pinMode(buzzer, OUTPUT);
 
-  randomSeed(analogRead(A0));
+  randomSeed(analogRead(A3));
 
   led_start_lose(3, 500);
 }
@@ -111,7 +111,7 @@ void loop() {
   waitPlayer();
 
   // reiniciando as variáveis caso seja fim de jogo
-  if (gameOver == true) {
+  if (gameOver) {
     memset(sequence, 0, sizeof(sequence));
     Round = 0;
     step = 0;
@@ -124,6 +124,29 @@ void loop() {
 
 // ****************     Funções do projeto    **************** //
 // ****************   chamadas anteriormente   **************** //
+
+
+bool validMoveDetected(){
+  if(xJoyValue < 512 - zonaPer || xJoyValue > 512 + zonaPer ||
+     yJoyValue < 512 - zonaPer || yJoyValue > 512 + zonaPer  ){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+int dirJoyID(){
+  if(!validMoveDetected()) return -1;
+
+  if(xJoyValue < 512 - zonaPer) return 0;
+  if(xJoyValue > 512 + zonaPer) return 1;
+  if(yJoyValue < 512 - zonaPer) return 2;
+  if(yJoyValue > 512 + zonaPer) return 3;
+
+  // unidentified
+  return -1; 
+}
+
 
 // (quantas vezes vai piscar, por quanto tempo os leds irão ficar naquele estado (aceso ou apagado)
 void led_start_lose(int tBlink, int ledTime) {
@@ -151,7 +174,7 @@ void nextRound() {
   // sorteia um número e o adiciona ao array (vetor/lista) sequence[32]{};
   int randValue = random(4);
   sequence[Round] = randValue;
-  Round++;  //round + 1 = round++
+  Round++; 
 
   // verificar como software está lidando com as variáveis
   Serial.println(randValue);
@@ -173,36 +196,56 @@ void reprSequence() {
 // função responsável por verificar o desempenho do player
 // move_made = jogada efetuada/feita
 void waitPlayer() {
+
   // Loop que aguarda e confere cada jogada do jogador em relação à sequência
   for (int i = 0; i < Round; i++) {
+
     bool move_made = false;  // mantêm o software parado até o jogador pressionar o botão
-    
+
     while (!move_made) {
-      for (int btn = 0; btn < 4; btn++) {
-        if (digitalRead(buttons[btn]) == HIGH) {
-          button_pressed = btn;
-          digitalWrite(leds[btn], HIGH);
-          tone(buzzer, tones[btn]);
-          delay(300);
-          digitalWrite(leds[btn], LOW);
-          noTone(buzzer);
-          move_made = true;  //marca que o jogador pressionou o botão
-          delay(1000);
+      xJoyValue = analogRead(xJoyPin);
+      yJoyValue = analogRead(yJoyPin);
+
+      int direction = dirJoyID();
+
+      // Se alguma direção válida foi detectada
+      if (direction != -1) {
+
+        button_pressed = direction;
+
+        // feedback visual e sonoro
+        digitalWrite(leds[direction], HIGH);
+        tone(buzzer, tones[direction]);
+        delay(300);
+
+        digitalWrite(leds[direction], LOW);
+        noTone(buzzer);
+
+        move_made = true;
+
+        // aguarda o joystick voltar para o centro
+        while (validMoveDetected()) {
+          xJoyValue = analogRead(xJoyPin);
+          yJoyValue = analogRead(yJoyPin);
+          delay(10);
         }
+
+        delay(300);
       }
     }
 
-    // O software precisa verificar se o jogador acertou a jogada - por isso, ao olhar o pior dos casos:
+    // Verificação da jogada
     if (sequence[step] != button_pressed) {
+      
       // finalizando o jogo...
       led_start_lose(3, 1000);
-      gameOver = true;  //perdeu, mané 🤣
-      break;            //quebra o funcionamento desta função e volta para o void loop
+      gameOver = true;  // perdeu, mané
+      break;
     }
-
+    
     step++;
   }
-  
-  // reiniciamos o passo do jogador para o 0 para indicar uma nova fase - voltando para o loop.
+
+  // reiniciamos o passo do jogador para o 0 para indicar uma nova fase
   step = 0;
 }
