@@ -9,7 +9,7 @@
 
   Pela última vez:
   Modificado por: Francisco Passos
-  Modificado em: 17/01/2026
+  Modificado em: 22/01/2026
 
   E-mails para contato do desenvolvedor deste projeto:
   E-mail pessoal:       franciscopassos.contato@gmail.com   
@@ -46,9 +46,9 @@
 
 // leds
 const int red = 2;
-const int green = 3;
-const int blue = 4;
-const int yellow = 5;
+const int green = 4;
+const int blue = 5;
+const int yellow = 3;
 
 // buzzer passivo
 const int buzzer = 6;
@@ -62,7 +62,7 @@ const int yJoyPin = A1;
 
 // array -> coração do projeto (é uma lista de variáveis de um único tipo) Neste projeto é conveniente o uso de inteiros (int)
 int sequence[32] = {};
-int leds[4] = { 2, 3, 4, 5 };
+int leds[4] = { 5, 2, 4, 3 };
 int tones[4] = { 262, 294, 330, 349 };
 
 // indicando que o jogo começa no round 0
