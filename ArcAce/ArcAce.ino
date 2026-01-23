@@ -18,7 +18,7 @@
 
   Materiais de apoio durante a programação deste código fonte:
     Playlist do professor josé de assis: https://www.youtube.com/watch?v=gYgGgox5Q4o&list=PLbEOwbQR9lqwq5E0DW3CvjfmF4FoIAW1f  
-    Website onlinegbd compiler: https://learn.onlinegdb.com/c%2B%2B_array
+    Website onlinegdb compiler: https://learn.onlinegdb.com/c%2B%2B_array
 
   Para a mais fácil visualização técnica deste projeto é necessário ter como base os conhecimentos em:
       * lógica de programação
@@ -28,7 +28,6 @@
       * conhecimento básico em circuitos eletrônicos
 
   - Detalhes importantes sobre o projeto - 
-      
 
       * Frequência das notas:
         Dó - 262 Hz
@@ -57,11 +56,12 @@ const int buzzer = 6;
 const int xJoyPin = A0;
 const int yJoyPin = A1;
 
-
 // Botões do ArcAce 
 const int play_button = 7;
-bool continue_game = false; 
+const int stop_button = 9;
 
+bool continue_game = false; 
+bool stop_game = false; 
 
 // **************** Variáveis globais do software **************** //
 
@@ -98,7 +98,9 @@ void setup() {
   pinMode(yellow, OUTPUT);
 
   pinMode(buzzer, OUTPUT);
+  
   pinMode(play_button, INPUT_PULLUP);
+  pinMode(stop_button, INPUT_PULLUP);
 
   randomSeed(analogRead(A3));
 
@@ -116,7 +118,7 @@ void loop() {
     }
     return;
   }
-  
+
   nextRound();
   reprSequence();
   waitPlayer(); 
@@ -210,9 +212,15 @@ void waitPlayer() {
 
   // Loop que aguarda e confere cada jogada do jogador em relação à sequência
   for (int i = 0; i < Round; i++) {
-    bool move_made = false;  // mantêm o software parado até o jogador pressionar o botão
-
+    bool move_made = false; 
+    
     while (!move_made) {
+      // caso o jogador desista da partida, o jogo acaba da mesma forma como se o jogador tivesse errado a sequência 
+      if (digitalRead(stop_button) == LOW) {
+        stop_game = true;
+        move_made = true; 
+      }
+
       xJoyValue = analogRead(xJoyPin);
       yJoyValue = analogRead(yJoyPin);
 
@@ -243,12 +251,13 @@ void waitPlayer() {
     }
 
     // Verificação da jogada
-    if (sequence[step] != direction) {
+    if ((sequence[step] != direction) || stop_game == true) {
       
       // finalizando o jogo... 🙏
       led_start_lose(3, 700);
       gameOver = true;  // perdeu, mané
       continue_game = false;
+      stop_game = false;
       break;
     }
     
