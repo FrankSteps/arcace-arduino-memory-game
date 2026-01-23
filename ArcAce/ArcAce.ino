@@ -9,7 +9,7 @@
 
   Pela última vez:
   Modificado por: Francisco Passos
-  Modificado em: 22/01/2026
+  Modificado em: 23/01/2026
 
   E-mails para contato do desenvolvedor deste projeto:
   E-mail pessoal:       franciscopassos.contato@gmail.com   
@@ -28,7 +28,7 @@
       * conhecimento básico em circuitos eletrônicos
 
   - Detalhes importantes sobre o projeto - 
-      * Os botões estão configurados como pull_down
+      
 
       * Frequência das notas:
         Dó - 262 Hz
@@ -58,31 +58,32 @@ const int xJoyPin = A0;
 const int yJoyPin = A1;
 
 
+// Botões do ArcAce 
+const int play_button = 7;
+bool continue_game = false; 
+
+
 // **************** Variáveis globais do software **************** //
 
 // array -> coração do projeto (é uma lista de variáveis de um único tipo) Neste projeto é conveniente o uso de inteiros (int)
 int sequence[32] = {};
-int leds[4] = { 5, 2, 4, 3 };
+int leds[4] = { blue, red, green, yellow };
 int tones[4] = { 262, 294, 330, 349 };
+
+String dirJoyStick[4] = {"RIGHT", "LEFT", "DOWN", "UP"};
 
 // indicando que o jogo começa no round 0
 int Round = 0;
-
-// variáveis responsáveis pela resposta do usuário/jogador
-int button_pressed = 0;
-int step = 0;
 
 // indica se o jogo terminou ou não
 bool gameOver = false;
 
 // variáveis para o funcionamento do joystick
-const int zonaPer = 100;
+const int zonaPer = 170;
 
 int xJoyValue;
 int yJoyValue;
 
-// mantido aqui apenas para debug no terminal serial
-String dirJoyStick[4] = {"LEFT", "RIGHT", "UP", "DOWN"};
 
 // ****************    Manipulação do software  **************** //
 // ****************  Configurações e as chamadas   **************** //
@@ -97,6 +98,7 @@ void setup() {
   pinMode(yellow, OUTPUT);
 
   pinMode(buzzer, OUTPUT);
+  pinMode(play_button, INPUT_PULLUP);
 
   randomSeed(analogRead(A3));
 
@@ -105,16 +107,24 @@ void setup() {
 
 // função de loop (não me fale mais nada!)
 void loop() {
-  // separando as ações em funções - cada uma será responsável por uma etapa do jogo
+  if (!continue_game) {
+    if (digitalRead(play_button) == LOW) {
+      delay(50);
+      if (digitalRead(play_button) == LOW) {
+        continue_game = true;
+      }
+    }
+    return;
+  }
+  
   nextRound();
   reprSequence();
-  waitPlayer();
+  waitPlayer(); 
 
   // reiniciando as variáveis caso seja fim de jogo
   if (gameOver) {
     memset(sequence, 0, sizeof(sequence));
     Round = 0;
-    step = 0;
     gameOver = false;
   }
 
@@ -136,14 +146,13 @@ bool validMoveDetected(){
 }
 
 int dirJoyID(){
-  if(!validMoveDetected()) return -1;
+  if(!validMoveDetected()) return -1;      // inválido 
 
-  if(xJoyValue < 512 - zonaPer) return 0;
-  if(xJoyValue > 512 + zonaPer) return 1;
-  if(yJoyValue < 512 - zonaPer) return 2;
-  if(yJoyValue > 512 + zonaPer) return 3;
+  if(xJoyValue < 512 - zonaPer) return 0;  // blue     - direita
+  if(xJoyValue > 512 + zonaPer) return 1;  // red      - esquerda
+  if(yJoyValue < 512 - zonaPer) return 2;  // green    - baixo
+  if(yJoyValue > 512 + zonaPer) return 3;  // yellow   - cima
 
-  // unidentified
   return -1; 
 }
 
@@ -196,22 +205,21 @@ void reprSequence() {
 // função responsável por verificar o desempenho do player
 // move_made = jogada efetuada/feita
 void waitPlayer() {
+  int step = 0;
+  int direction = 0;
 
   // Loop que aguarda e confere cada jogada do jogador em relação à sequência
   for (int i = 0; i < Round; i++) {
-
     bool move_made = false;  // mantêm o software parado até o jogador pressionar o botão
 
     while (!move_made) {
       xJoyValue = analogRead(xJoyPin);
       yJoyValue = analogRead(yJoyPin);
 
-      int direction = dirJoyID();
+      direction = dirJoyID();
 
       // Se alguma direção válida foi detectada
       if (direction != -1) {
-
-        button_pressed = direction;
 
         // feedback visual e sonoro
         digitalWrite(leds[direction], HIGH);
@@ -235,11 +243,12 @@ void waitPlayer() {
     }
 
     // Verificação da jogada
-    if (sequence[step] != button_pressed) {
+    if (sequence[step] != direction) {
       
-      // finalizando o jogo...
-      led_start_lose(3, 1000);
+      // finalizando o jogo... 🙏
+      led_start_lose(3, 700);
       gameOver = true;  // perdeu, mané
+      continue_game = false;
       break;
     }
     
