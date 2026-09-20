@@ -1,8 +1,8 @@
-# Contribuindo com o Seed++
+# Contribuindo com o Arc ace 
 
-Obrigado pelo interesse em contribuir com o **Arc ace**!
+Quando tive a ideia de utilizar um joystick no lugar dos botões, tinha dois objetivos em mente: facilitar a implementação de novas direções e movimentos, como diagonais principais e secundárias, movimentos circulares, semicírculos etc., além de trazer ao brinquedo uma estética inspirada nos anos 90. Essa estética, inclusive, era um dos meus principais objetivos desde o princípio.
 
-Este projeto tem como objetivo servir tanto como um sistema funcional de controle de acesso quanto como um estudo de **sistemas embarcados e psicologia aplicada**.
+Não sei quando essa ideia será implementada no Arc ace, mas espero que não seja por mim. Dito isso, obrigado por colaborar com o Arc ace!
 
 ## Como contribuir
 
@@ -21,7 +21,7 @@ Você pode contribuir de várias formas:
 
 Exemplo:
 
-```
+```bash
 git checkout -b minha-melhoria
 ```
 
