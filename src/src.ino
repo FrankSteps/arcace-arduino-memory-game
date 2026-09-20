@@ -1,47 +1,60 @@
 /*
-  Projeto desenvolvido para o laboratório FnE (Física na Escola), DFI (Departamento de física), UFS (Universidade Federal de Sergipe).
-  Desenvolvido por: Francisco Passos - Frank Steps
-  Desenvolvido em: 07/09/2025
+    ======================== Projeto Arc Ace =========================
 
-  Sob a supervisão de: Edvaldo Alves
-  Outros participantes deste projeto:
-    * V. S. Junior (Scarnera) -> Vai fazer a parte mais chata 🙏🙏🙏🙏🙏🙏🙏🙏🙏
+  Projeto desenvolvido para o laboratório Física na Escola (FnE), do Departamento de Física (DFI) da Universidade Federal de Sergipe (UFS).
 
-  Pela última vez:
-  Modificado por: Francisco Passos
-  Modificado em: 23/01/2026
+  Desenvolvedor:
+    Francisco Passos — Frank Steps
 
-  E-mails para contato do desenvolvedor deste projeto:
-  E-mail pessoal:       franciscopassos.contato@gmail.com   
-  E-mail acadêmico:     francisco.alves@dcomp.ufs.br           
-  E-mail empresarial:   contato@franksteps.com.br    
+  Data de refatoração: 
+    19/09/2026
 
-  Materiais de apoio durante a programação deste código fonte:
-    Playlist do professor josé de assis: https://www.youtube.com/watch?v=gYgGgox5Q4o&list=PLbEOwbQR9lqwq5E0DW3CvjfmF4FoIAW1f  
-    Website onlinegdb compiler: https://learn.onlinegdb.com/c%2B%2B_array
+  Supervisão: 
+    Edvaldo Alves
 
-  Para a mais fácil visualização técnica deste projeto é necessário ter como base os conhecimentos em:
-      * lógica de programação
-      * tipos de vaeriáveis e suas aplicações
-      * funções e chamadas de funções em C++  
-      * vetores/arrays em C++ 
-      * conhecimento básico em circuitos eletrônicos
+  Participantes:
+    V. S. Junior (Scarnera) — desenvolvimento do case do projeto
 
-  - Detalhes importantes sobre o projeto - 
+  ======================= MATERIAIS DE APOIO =======================
 
-      * Frequência das notas:
-        Dó - 262 Hz
-        Ré - 294 Hz
-        Mi - 330 Hz
-        Fá - 349 Hz
-        Sol - 392 Hz
-        Lá - 440 Hz
-        Si - 494 Hz
-        #Dó - 528 Hz
+  Playlist do professor José de Assis:
+  https://www.youtube.com/watch?v=gYgGgox5Q4o&list=PLbEOwbQR9lqwq5E0DW3CvjfmF4FoIAW1f
 
-   Detalhes: Estou fazendo testes com o joystick e entendendo o seu funcionamento. Assim que conveniente, irei implementá-lo a este 
-   código. 
+  OnlineGDB — C++:
+  https://learn.onlinegdb.com/c%2B%2B_array
+
+
+  ===================== FREQUÊNCIA DAS NOTAS ======================
+
+  Dó  — 262 Hz
+  Ré  — 294 Hz
+  Mi  — 330 Hz
+  Fá  — 349 Hz
+  Sol — 392 Hz
+  Lá  — 440 Hz
+  Si  — 494 Hz
+  Dó# — 528 Hz
+
+
+  ========================= APPLE JUICE ===========================
+
+  Para reduzir a quantidade de pinos digitais e analógicos utilizados pelo Arduino Uno, foi utilizada a placa Apple Juice, desenvolvida
+  por Francisco Passos - Frank Steps (sob a supervisão de Edvaldo Alves) para FnE.
+
+  Repositório da documentação do projeto e do simulador da Apple Juice:
+  https://github.com/FrankSteps/apple-juice-learning-board-simulator
+
+
+  =========================== SOBRE ===============================
+
+  O software implementa a lógica do jogo ArcAce, no qual uma sequência de direções é apresentada por meio de LEDs e sinais sonoros. O
+  jogador deve reproduzir a sequência utilizando o joystick.
+
+  O sistema utiliza um contador embutido ao Apple Juice para registrar a pontuação do jogador.
 */
+
+
+// ************************* Componentes ************************* //
 
 // leds
 const int red = 2;
@@ -60,9 +73,12 @@ const int yJoyPin = A1;
 const int play_button = 7;
 const int stop_button = 9;
 
-bool continue_game = false; 
-bool stop_game = false; 
 
+// conexão do apple juice no arduino
+const int applejuice_clock = 10;
+const int applejuice_reset = 11;
+
+  
 // **************** Variáveis globais do software **************** //
 
 // array -> coração do projeto (é uma lista de variáveis de um único tipo) Neste projeto é conveniente o uso de inteiros (int)
@@ -84,9 +100,13 @@ const int zonaPer = 170;
 int xJoyValue;
 int yJoyValue;
 
+//variáveis para o funcionamento da lógica de continuar e parar o jogo
+bool continue_game = false; 
+bool stop_game = false; 
 
-// ****************    Manipulação do software  **************** //
-// ****************  Configurações e as chamadas   **************** //
+
+// ****************     Manipulação do software     **************** //
+// ****************   Configurações e as chamadas   **************** //
 
 // configurações iniciais -> definindo saída, entrada, chamando funções para indicar sinalização, serial e etc
 void setup() {
@@ -98,6 +118,9 @@ void setup() {
   pinMode(yellow, OUTPUT);
 
   pinMode(buzzer, OUTPUT);
+  
+  pinMode(applejuice_clock, OUTPUT);
+  pinMode(applejuice_reset, OUTPUT);
   
   pinMode(play_button, INPUT_PULLUP);
   pinMode(stop_button, INPUT_PULLUP);
@@ -120,22 +143,38 @@ void loop() {
   }
 
   nextRound();
-  reprSequence();
-  waitPlayer(); 
 
   // reiniciando as variáveis caso seja fim de jogo
   if (gameOver) {
     memset(sequence, 0, sizeof(sequence));
     Round = 0;
     gameOver = false;
+    continue_game = false;
+    return;
   }
+
+  reprSequence();
+  waitPlayer();
 
   delay(1000);
 }
 
 
-// ****************     Funções do projeto    **************** //
-// ****************   chamadas anteriormente   **************** //
+// **************************   Funções   ************************** //
+
+// aplica o reset no contador
+void applyReset(){
+  digitalWrite(applejuice_reset, HIGH);
+  delay(500);
+  digitalWrite(applejuice_reset, LOW);
+}
+
+// aplica o clock no contador (soma +1 ponto)
+void applyClock(){
+  digitalWrite(applejuice_clock, HIGH);
+  delay(500);
+  digitalWrite(applejuice_clock, LOW);
+}
 
 
 bool validMoveDetected(){
@@ -207,10 +246,9 @@ void reprSequence() {
 // função responsável por verificar o desempenho do player
 // move_made = jogada efetuada/feita
 void waitPlayer() {
-  int step = 0;
   int direction = 0;
 
-  // Loop que aguarda e confere cada jogada do jogador em relação à sequência
+  // Loop que aguarda e confere cada jogada em relação à sequência
   for (int i = 0; i < Round; i++) {
     bool move_made = false; 
     
@@ -219,6 +257,8 @@ void waitPlayer() {
       if (digitalRead(stop_button) == LOW) {
         stop_game = true;
         move_made = true; 
+        applyReset();
+        break;
       }
 
       xJoyValue = analogRead(xJoyPin);
@@ -239,6 +279,7 @@ void waitPlayer() {
 
         move_made = true;
 
+
         // aguarda o joystick voltar para o centro
         while (validMoveDetected()) {
           xJoyValue = analogRead(xJoyPin);
@@ -251,19 +292,16 @@ void waitPlayer() {
     }
 
     // Verificação da jogada
-    if ((sequence[step] != direction) || stop_game == true) {
+    if ((sequence[i] != direction) || stop_game == true) {
       
-      // finalizando o jogo... 🙏
       led_start_lose(3, 700);
-      gameOver = true;  // perdeu, mané
+      gameOver = true;
       continue_game = false;
       stop_game = false;
+      applyReset();
       break;
     }
     
-    step++;
+    applyClock();
   }
-
-  // reiniciamos o passo do jogador para o 0 para indicar uma nova fase
-  step = 0;
 }
