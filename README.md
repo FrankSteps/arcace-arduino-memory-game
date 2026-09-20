@@ -51,8 +51,7 @@ O projeto possui dois botões:
 
 * **PLAY** — inicia uma partida.
 * **STOP** — encerra a partida atual.
-
-O sinal de **RESET** é utilizado para reiniciar o contador da Apple Juice.
+* **RESET** — reseta o arduino e o apple juice
 
 ## LEDs e buzzer
 
