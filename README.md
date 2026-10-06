@@ -1,8 +1,10 @@
-# Arc ace
+<p align="center">
+  <img src="assets/logo/arcace-banner-1000x.png" alt="Arc Ace" width="1000">
+</p>
 
-Um jogo de memória eletrônico desenvolvido com **Arduino Nano** e joystick** no laboratório **Física na Escola (FnE)**, do Departamento de Física da Universidade Federal de Sergipe (UFS).
+Um jogo de memória eletrônico desenvolvido com **Arduino Nano** e **joystick** no laboratório **Física na Escola (FnE)**, do Departamento de Física da **Universidade Federal de Sergipe (UFS)**.
 
-O jogador deve memorizar e reproduzir uma sequência de quatro direções indicada pelos LEDs e pelo buzzer. A cada rodada, uma nova direção é adicionada à sequência, aumentando progressivamente a dificuldade.
+O jogador deve memorizar e reproduzir uma sequência de quatro direções indicada pelos **LEDs** e pelo **buzzer**. A cada rodada, uma nova direção é adicionada à sequência, aumentando progressivamente a dificuldade.
 
 ![prototipo do arc ace](assets/projeto/prototipo.jpeg)
 
