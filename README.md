@@ -2,7 +2,7 @@
   <img src="assets/logo/arcace-banner-1000x.png" alt="Arc Ace" width="1000">
 </p>
 
-Um jogo de memória eletrônico desenvolvido com **Arduino Nano** e **joystick** no laboratório **Física na Escola (FnE)**, do Departamento de Física da **Universidade Federal de Sergipe (UFS)**.
+Um jogo de memória eletrônico desenvolvido com **Arduino Nano** e **joystick** no laboratório **Física na Escola (FnEsc)**, do Departamento de Física da **Universidade Federal de Sergipe (UFS)**.
 
 O jogador deve memorizar e reproduzir uma sequência de quatro direções indicada pelos **LEDs** e pelo **buzzer**. A cada rodada, uma nova direção é adicionada à sequência, aumentando progressivamente a dificuldade.
 
@@ -13,7 +13,7 @@ O jogador deve memorizar e reproduzir uma sequência de quatro direções indica
 O jogo possui quatro direções possíveis:
 
 | Direção  | LED      | Frequência |
-| -------- | -------- | ---------: |
+| -------- | -------- | ---------- |
 | Direita  | Azul     |     262 Hz |
 | Esquerda | Vermelho |     294 Hz |
 | Baixo    | Verde    |     330 Hz |
@@ -47,13 +47,15 @@ Uma zona morta é utilizada para evitar que pequenas variações do joystick sej
 
 Depois que uma direção é detectada, o sistema aguarda o retorno do joystick à posição central antes de aceitar o próximo movimento.
 
+O joystick permite fazer combinações de movimentos como na diagonal e circular em atualizações futuras.
+
 ### Botões
 
-O projeto possui dois botões:
+O projeto possui três botões:
 
 * **PLAY** — inicia uma partida.
 * **STOP** — encerra a partida atual.
-* **RESET** — reseta o arduino e o apple juice
+* **RESET** (joystick) — reseta o arduino e o apple juice
 
 ## LEDs e buzzer
 
@@ -69,9 +71,9 @@ O mesmo sistema de feedback é utilizado quando o jogador realiza uma jogada.
 
 ## Apple Juice
 
-A **Apple Juice** é uma placa desenvolvida por Francisco Passos para a FnE para auxiliar na utilização dos pinos do Arduino em projetos educacionais.
+A **Apple Juice** é uma placa desenvolvida por Francisco Passos (@FrankSteps) no laboratório **Física na Escola (FnEsc)**, do Departamento de Física da **Universidade Federal de Sergipe (UFS)**, para auxiliar na utilização dos pinos do Arduino em projetos educacionais.
 
-Neste projeto, ela é utilizada para controlar o contador de pontuação através de dois sinais:
+Neste projeto, ela é utilizada para usada para o criar o efeito de "pecorrer" dos leds no letreiro e controlar o contador de pontuação através de dois sinais:
 
 * **CLOCK** — incrementa o contador.
 * **RESET** — reinicia o contador.
@@ -91,15 +93,14 @@ Mais informações sobre a Apple Juice e seu simulador:
 
 O projeto utiliza:
 
-* Arduino Nano
-* Placa Apple Juice
-* Joystick analógico
-* 4 LEDs
-* Resistores para os LEDs
-* Buzzer passivo
-* 2 botões
-* Case desenvolvido em modelagem 3D
-* Componentes necessários para as conexões elétricas
+* 1x Arduino Nano
+* 1x Placa Apple Juice
+* 1x Joystick analógico
+* 12x LEDs do tipo fosco para os paineis de direção (3 para cada cor)
+* Resistores para cada LED
+* 1x alto falante de ~3 polegadas
+* 2x botões do tipo Sanwa
+* 2x Display de sete segmentos 
 
 ### Modelo 3D
 
@@ -115,13 +116,14 @@ O case do ArcAce foi idealizado por Francisco e modelado e melhorado por Scarner
 | LED amarelo       |              D3 |
 | LED verde         |              D4 |
 | LED azul          |              D5 |
-| Buzzer            |              D6 |
+| Alto falante      |              D6 |
 | PLAY              |              D7 |
 | STOP              |              D9 |
 | Apple Juice CLOCK |             D10 |
 | Apple Juice RESET |             D11 |
 | Joystick X        |              A0 |
 | Joystick Y        |              A1 |
+| Joystick SW       |             D12 |
 
 O pino **A3** é utilizado como fonte para a geração da semente do gerador de números aleatórios:
 
@@ -131,12 +133,16 @@ randomSeed(analogRead(A3));
 
 ## Estrutura do projeto
 
-```text
+```bash
 arcace-arduino-memory-game/
 ├── assets
 │   ├── colaboradores
 │   │   ├── edvaldo.png
 │   │   └── scarnera.png
+│   ├── logo
+│   │   ├── arcace-banner-1000x.png
+│   │   ├── arcace-banner.png
+│   │   └── arcace-logo.bmp
 │   ├── modelo-3d
 │   │   └── modelo-3d.jpeg
 │   └── projeto
@@ -154,13 +160,11 @@ arcace-arduino-memory-game/
 
 ### Apple Juice
 
-Repositório da Apple Juice e seu simulador: [acesse clicando aqui](https://github.com/FrankSteps/apple-juice-learning-board-simulator?utm_source=chatgpt.com)
+Repositório da Apple Juice e seu simulador: [acesse clicando aqui](https://github.com/FrankSteps/apple-juice-learning-board-simulator)
 
 ## Licença
 
-Este projeto está licenciado sob a **MIT License**.
-
-Consulte o arquivo [`LICENSE`](LICENSE) para obter o texto completo da licença.
+Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [`LICENSE`](LICENSE) para obter o texto completo da licença.
 
 ## Colaboradores
 
